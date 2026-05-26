@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
@@ -27,7 +26,6 @@ public class Wallet {
     private BigDecimal balance;
 
     @Version
-    @Setter
     private Long version;
 
     @Column(name = "created_at", nullable = false, updatable = false)

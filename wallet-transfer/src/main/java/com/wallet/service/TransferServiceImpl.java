@@ -51,6 +51,10 @@ public class TransferServiceImpl implements TransferService {
             // Phase 3: persist FAILED state in its own transaction (Phase 2 already rolled back)
             orchestrator.markTransferFailed(outcome.transfer().getId(), ex.getMessage());
             throw ex;
+        } catch (RuntimeException ex) {
+            // Phase 3: unexpected Phase 2 failure — mark FAILED so transfer is not stuck as PENDING
+            orchestrator.markTransferFailed(outcome.transfer().getId(), ex.getMessage());
+            throw ex;
         }
     }
 

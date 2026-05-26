@@ -117,7 +117,8 @@ public class TransferOrchestrator {
 
         // Re-fetch pendingTransfer: it was saved in a different (REQUIRES_NEW) transaction
         // and is a detached entity in this transaction context
-        Transfer transfer = transferRepository.findById(pendingTransfer.getId()).orElseThrow();
+        Transfer transfer = transferRepository.findById(pendingTransfer.getId())
+            .orElseThrow(() -> new IllegalStateException("Transfer not found in Phase 2: " + pendingTransfer.getId()));
         transfer.markProcessed();
         transferRepository.save(transfer);
 

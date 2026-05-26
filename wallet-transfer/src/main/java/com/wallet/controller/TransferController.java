@@ -1,5 +1,6 @@
 package com.wallet.controller;
 
+import com.wallet.domain.TransferStatus;
 import com.wallet.dto.TransferExecutionResult;
 import com.wallet.dto.TransferRequest;
 import com.wallet.dto.TransferResponse;
@@ -28,8 +29,14 @@ public class TransferController {
     @PostMapping
     public ResponseEntity<TransferResponse> createTransfer(@Valid @RequestBody TransferRequest request) {
         TransferExecutionResult result = transferService.executeTransfer(request);
-        HttpStatus status = result.isNewTransfer() ? HttpStatus.CREATED : HttpStatus.OK;
-        return ResponseEntity.status(status).body(result.transfer());
+        if (result.isNewTransfer()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(result.transfer());
+        }
+        // Idempotent replay: mirror original outcome so callers see consistent HTTP semantics
+        if (result.transfer().status() == TransferStatus.FAILED) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(result.transfer());
+        }
+        return ResponseEntity.ok(result.transfer());
     }
 
     @GetMapping("/{id}")
